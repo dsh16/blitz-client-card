@@ -137,17 +137,22 @@
                   >
                   <p v-else class="field-value">Не указан</p>
                   <button
+                    v-if="client.phone"
                     class="copy-button contact-copy-button"
-                    :disabled="!client.phone"
-                    :title="
-                      client.phone
-                        ? 'Скопировать номер телефона'
-                        : 'Телефон не указан'
-                    "
+                    title="Скопировать номер телефона"
                     aria-label="Скопировать номер телефона"
                     @click="copyContact('phone')"
                   >
                     <AppIcon name="copy" :size="14" />
+                  </button>
+                  <button
+                    v-else
+                    class="copy-button contact-copy-button"
+                    title="Указать номер телефона"
+                    aria-label="Указать номер телефона"
+                    @click="openModal('edit', '#client-phone')"
+                  >
+                    <AppIcon name="edit" :size="14" />
                   </button>
                 </div>
               </div>
@@ -166,15 +171,22 @@
                   >
                   <p v-else class="field-value">Не указан</p>
                   <button
+                    v-if="client.email"
                     class="copy-button contact-copy-button"
-                    :disabled="!client.email"
-                    :title="
-                      client.email ? 'Скопировать email' : 'Email не указан'
-                    "
+                    title="Скопировать email"
                     aria-label="Скопировать email"
                     @click="copyContact('email')"
                   >
                     <AppIcon name="copy" :size="14" />
+                  </button>
+                  <button
+                    v-else
+                    class="copy-button contact-copy-button"
+                    title="Указать email"
+                    aria-label="Указать email"
+                    @click="openModal('edit', '#client-email')"
+                  >
+                    <AppIcon name="edit" :size="14" />
                   </button>
                 </div>
               </div>
@@ -514,11 +526,13 @@
             <div class="form-columns">
               <label class="form-field"
                 >Телефон<input
+                  id="client-phone"
                   v-model.trim="form.phone"
                   type="tel"
                   placeholder="+7 (999) 000-00-00" /></label
               ><label class="form-field"
                 >Email<input
+                  id="client-email"
                   v-model.trim="form.email"
                   type="email"
                   placeholder="client@example.ru"
@@ -532,6 +546,26 @@
               </button>
             </div>
           </form>
+          <div v-else-if="modal === 'copy'" class="modal-body">
+            <p class="modal-description">
+              Браузер ограничил автоматическое копирование. Нажмите Ctrl+C или
+              ⌘C. На телефоне удерживайте выделенный текст и выберите
+              «Скопировать».
+            </p>
+            <label class="form-field"
+              >Текст для копирования<input
+                :value="copyValue"
+                readonly
+                autocomplete="off"
+                spellcheck="false"
+                @focus="$event.target.select()"
+            /></label>
+            <div class="modal-footer">
+              <button class="button button-primary" @click="closeModal">
+                Готово
+              </button>
+            </div>
+          </div>
           <form
             v-else-if="modal === 'vehicle'"
             class="modal-body"
@@ -892,6 +926,8 @@
 </template>
 
 <script>
+import { copyToClipboard } from "~/utils/clipboard";
+
 const initialClient = () => ({
   name: "(КА) ИП Андреева Л.С.",
   type: "Юридическое лицо",
@@ -942,6 +978,7 @@ export default {
       activeNav: "calendar",
       topMenu: false,
       modal: null,
+      copyValue: "",
       form: {},
       formError: "",
       toast: "",
@@ -988,6 +1025,7 @@ export default {
     modalTitle() {
       return {
         edit: "Редактировать клиента",
+        copy: "Скопировать данные",
         vehicle: "Данные автомобиля",
         tag: "Добавить категорию",
         subscription: "Добавить абонемент",
@@ -1064,7 +1102,7 @@ export default {
         this.toast = "";
       }, 3400);
     },
-    openModal(type) {
+    openModal(type, focusSelector) {
       this.lastFocusedElement = document.activeElement;
       this.modal = type;
       this.topMenu = false;
@@ -1088,9 +1126,11 @@ export default {
       document.body.style.overflow = "hidden";
       this.$nextTick(() => {
         const input = this.$el.querySelector(
-          ".modal-card input, .modal-card select, .modal-card textarea"
+          focusSelector ||
+            ".modal-card input, .modal-card select, .modal-card textarea"
         );
         (input || this.$el.querySelector(".modal-card")).focus();
+        if (type === "copy" && input) input.select();
       });
     },
     closeModal() {
@@ -1224,13 +1264,13 @@ export default {
     },
     async copyText(value, message) {
       if (!value) return;
-      try {
-        await navigator.clipboard.writeText(value);
+      clearTimeout(this.toastTimer);
+      this.toast = "";
+      if (await copyToClipboard(value)) {
         this.notify(message);
-      } catch (_) {
-        this.notify(
-          "Не удалось скопировать. Выделите текст и скопируйте вручную."
-        );
+      } else {
+        this.copyValue = String(value);
+        this.openModal("copy");
       }
     },
     navigate(item) {
