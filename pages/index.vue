@@ -210,7 +210,7 @@
       >
         <div class="section-header">
           <div>
-            <h2 id="tags-title">Теги</h2>
+            <h2 id="tags-title">Категории клиентов</h2>
             <p class="section-description">
               Теги помогают быстро находить клиентов и сегментировать базу.
             </p>
@@ -252,7 +252,7 @@
       >
         <div class="section-header">
           <div>
-            <h2 id="subscriptions-title" class="teal-heading">Абонементы</h2>
+            <h2 id="subscriptions-title">Абонементы</h2>
             <p class="section-description">
               Действующие и завершённые абонементы клиента.
             </p>
@@ -297,7 +297,7 @@
       >
         <div class="section-header">
           <div>
-            <h2 id="visits-title" class="teal-heading">История посещений</h2>
+            <h2 id="visits-title">История посещений</h2>
             <p class="section-description">
               Список всех визитов клиента с оказанными услугами.
             </p>

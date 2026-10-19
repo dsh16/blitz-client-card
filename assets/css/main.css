@@ -172,10 +172,9 @@ svg {
   gap: 15px;
 }
 .main-content {
-  margin-left: var(--main-left);
-  padding-right: 26px;
+  width: 80%;
+  margin-left: max(var(--main-left), 10%);
   padding-bottom: 18px;
-  max-width: 1680px;
 }
 .toolbar {
   height: 48px;
@@ -490,13 +489,11 @@ svg {
   margin-bottom: 10px;
 }
 .section-header h2 {
+  color: #000;
   font-size: 13px;
   line-height: 16px;
   font-weight: 600;
   letter-spacing: -0.1px;
-}
-.teal-heading {
-  color: var(--teal);
 }
 .section-description {
   font-size: 9px;
@@ -1226,7 +1223,6 @@ td small {
     gap: 22px;
   }
   .main-content {
-    padding-right: 32px;
     padding-bottom: 24px;
   }
   .toolbar {
@@ -1500,9 +1496,6 @@ td small {
   :root {
     --main-left: 65px;
   }
-  .main-content {
-    padding-right: 14px;
-  }
   .client-panel {
     grid-template-columns: 1fr;
     gap: 12px;
@@ -1642,15 +1635,14 @@ td small {
     display: none;
   }
   .main-content {
-    margin-left: 14px;
-    padding-right: 14px;
+    margin-left: 10%;
     padding-bottom: 8px;
   }
   .toolbar {
     position: absolute;
     top: 4px;
-    left: 14px;
-    right: 14px;
+    left: 10%;
+    right: 10%;
     height: 45px;
     gap: 5px;
   }
@@ -1881,6 +1873,17 @@ td small {
   .menu-collapsed .sidebar .nav-items,
   .menu-collapsed .sidebar-bottom > .nav-item:first-child {
     visibility: visible;
+  }
+}
+@media (max-width: 380px) {
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+  .contact-item:nth-child(2n) {
+    margin: 0;
+    padding: 9px 0;
+    border-left: 0;
+    border-top: 1px solid var(--line);
   }
 }
 @media (prefers-reduced-motion: reduce) {
