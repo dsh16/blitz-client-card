@@ -397,12 +397,28 @@
           <div>
             <h2 id="visits-title">История посещений</h2>
             <p class="section-description">
-              Список всех визитов клиента с оказанными услугами.
+              Предстоящие, отменённые и завершённые записи клиента.
             </p>
           </div>
           <span class="visit-counter"
             >{{ visits.length }}
             {{ visits.length === 1 ? "визит" : "визита" }}</span
+          >
+        </div>
+        <div
+          class="visit-status-legend"
+          role="list"
+          aria-label="Обозначения статусов записей"
+        >
+          <span
+            v-for="status in visitStatuses"
+            :key="status.value"
+            role="listitem"
+            class="visit-legend-item"
+            :class="'visit-status--' + status.value"
+            ><span class="visit-status-icon" aria-hidden="true"
+              ><AppIcon :name="status.icon" :size="13" /></span
+            >{{ status.label }}</span
           >
         </div>
         <div class="table-scroll">
@@ -414,22 +430,43 @@
                 <th>Сумма</th>
                 <th>Сотрудник</th>
                 <th>Филиал</th>
-                <th class="actions-heading">Действия</th>
+                <th>Тип</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(visit, index) in visits" :key="visit.id">
                 <td>
-                  <span>{{ visit.date }}</span
-                  ><small>{{ visit.day }}</small>
+                  <button
+                    class="visit-date-button"
+                    :aria-label="
+                      'Открыть запись: ' +
+                      visit.date +
+                      '. ' +
+                      visitStatusInfo(visit).label
+                    "
+                    @click="
+                      selectedVisit = index;
+                      openModal('visit');
+                    "
+                  >
+                    <span
+                      class="visit-status-icon"
+                      :class="'visit-status--' + visit.status"
+                      role="img"
+                      :aria-label="visitStatusInfo(visit).label"
+                      :title="visitStatusInfo(visit).label"
+                      ><AppIcon :name="visitStatusInfo(visit).icon" :size="15"
+                    /></span>
+                    <span class="visit-date-text"
+                      ><span>{{ visit.date }}</span
+                      ><small>{{ visit.day }}</small></span
+                    >
+                  </button>
                 </td>
                 <td class="service-cell">
                   <span v-for="service in visit.services" :key="service">{{
                     service
-                  }}</span
-                  ><small v-if="visit.planned" class="planned-label"
-                    >Предстоящая запись</small
-                  >
+                  }}</span>
                 </td>
                 <td class="money-cell">{{ formatMoney(visit.amount) }}</td>
                 <td>
@@ -439,17 +476,12 @@
                   </div>
                 </td>
                 <td>Основной филиал</td>
-                <td class="row-action">
-                  <button
-                    class="button table-menu-button"
-                    :aria-label="'Подробнее о визите ' + visit.date"
-                    @click="
-                      selectedVisit = index;
-                      openModal('visit');
-                    "
+                <td>
+                  <span
+                    class="booking-type"
+                    :class="'booking-type--' + visit.source"
+                    >{{ visit.source === "online" ? "Онлайн" : "Админ" }}</span
                   >
-                    <AppIcon name="more" :size="14" />
-                  </button>
                 </td>
               </tr>
             </tbody>
@@ -731,6 +763,13 @@
                 <option>Иванов С. · Мастер</option>
               </select></label
             >
+            <div class="form-field">
+              <label for="booking-source">Тип записи</label
+              ><select id="booking-source" v-model="form.source">
+                <option value="admin">Админ</option>
+                <option value="online">Онлайн</option>
+              </select>
+            </div>
             <p class="location-note">
               <AppIcon name="bag" :size="15" />Основной филиал
             </p>
@@ -747,9 +786,14 @@
             </div>
           </form>
           <div v-else-if="modal === 'visit'" class="modal-body">
-            <span class="status-badge">{{
-              visits[selectedVisit].planned ? "Запланирован" : "Визит завершён"
-            }}</span>
+            <span
+              class="visit-modal-status"
+              :class="'visit-status--' + visits[selectedVisit].status"
+              ><AppIcon
+                :name="visitStatusInfo(visits[selectedVisit]).icon"
+                :size="16"
+              />{{ visitStatusInfo(visits[selectedVisit]).label }}</span
+            >
             <dl class="detail-list">
               <div>
                 <dt>Дата и время</dt>
@@ -771,10 +815,20 @@
                 <dt>Сумма</dt>
                 <dd>{{ formatMoney(visits[selectedVisit].amount) }}</dd>
               </div>
+              <div>
+                <dt>Тип</dt>
+                <dd>
+                  {{
+                    visits[selectedVisit].source === "online"
+                      ? "Онлайн"
+                      : "Админ"
+                  }}
+                </dd>
+              </div>
             </dl>
             <div class="modal-footer">
               <button
-                v-if="visits[selectedVisit].planned"
+                v-if="visits[selectedVisit].status === 'upcoming'"
                 class="button danger-button"
                 @click="cancelVisit"
               >
@@ -823,7 +877,9 @@
               </div>
               <div>
                 <dt>Предстоящих записей</dt>
-                <dd>{{ visits.filter((v) => v.planned).length }}</dd>
+                <dd>
+                  {{ visits.filter((v) => v.status === "upcoming").length }}
+                </dd>
               </div>
             </dl>
             <div class="modal-footer">
@@ -941,6 +997,24 @@ const initialVehicle = () => ({
   bodyType: "",
   features: "",
 });
+const VISIT_STATUSES = [
+  { value: "upcoming", label: "Предстоящая", icon: "clock" },
+  { value: "cancelled", label: "Отменена", icon: "circle-close" },
+  { value: "completed", label: "Завершена", icon: "circle-check" },
+];
+const normalizeVisit = (visit) => {
+  const status = VISIT_STATUSES.some((item) => item.value === visit.status)
+    ? visit.status
+    : visit.planned
+    ? "upcoming"
+    : "completed";
+  return {
+    ...visit,
+    status,
+    source: visit.source === "online" ? "online" : "admin",
+    planned: status === "upcoming",
+  };
+};
 const initialVisits = () => [
   {
     id: 1,
@@ -948,6 +1022,8 @@ const initialVisits = () => [
     day: "Пн",
     services: ["Полировка пластика,", "Комплекс двухфазный (кузов, салон)"],
     amount: 2325,
+    source: "admin",
+    status: "completed",
     planned: false,
   },
 ];
@@ -971,6 +1047,7 @@ export default {
         "Другое",
       ],
       visits: initialVisits(),
+      visitStatuses: VISIT_STATUSES,
       tags: [],
       subscriptions: [],
       blacklisted: false,
@@ -1057,7 +1134,7 @@ export default {
       ) {
         this.client = { ...initialClient(), ...saved.client };
         this.vehicle = { ...initialVehicle(), ...saved.vehicle };
-        this.visits = saved.visits;
+        this.visits = saved.visits.map(normalizeVisit);
         this.tags = saved.tags || [];
         this.subscriptions = saved.subscriptions || [];
         this.blacklisted = !!saved.blacklisted;
@@ -1075,6 +1152,12 @@ export default {
     document.body.style.overflow = "";
   },
   methods: {
+    visitStatusInfo(visit) {
+      return (
+        VISIT_STATUSES.find((item) => item.value === visit.status) ||
+        VISIT_STATUSES[2]
+      );
+    },
     formatMoney(value) {
       return new Intl.NumberFormat("ru-RU").format(value) + " ₽";
     },
@@ -1122,7 +1205,12 @@ export default {
           ? { tag: "", color: this.colors[0] }
           : type === "subscription"
           ? { name: "", count: 5, price: 0 }
-          : { service: "Полировка пластика", date, time: "16:00" };
+          : {
+              service: "Полировка пластика",
+              date,
+              time: "16:00",
+              source: "admin",
+            };
       document.body.style.overflow = "hidden";
       this.$nextTick(() => {
         const input = this.$el.querySelector(
@@ -1236,6 +1324,8 @@ export default {
           .replace(/^./, (c) => c.toUpperCase()),
         services: [this.form.service],
         amount: 0,
+        source: this.form.source === "online" ? "online" : "admin",
+        status: "upcoming",
         planned: true,
       });
       this.persist();
@@ -1248,7 +1338,13 @@ export default {
       );
     },
     cancelVisit() {
-      this.visits.splice(this.selectedVisit, 1);
+      const visit = this.visits[this.selectedVisit];
+      if (!visit || visit.status !== "upcoming") return;
+      this.$set(this.visits, this.selectedVisit, {
+        ...visit,
+        status: "cancelled",
+        planned: false,
+      });
       this.persist();
       this.closeModal();
       this.notify("Запись отменена");

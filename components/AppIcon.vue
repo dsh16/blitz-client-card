@@ -10,7 +10,19 @@
     stroke-linejoin="round"
     aria-hidden="true"
   >
-    <g v-if="name === 'car'">
+    <g v-if="name === 'clock'">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </g>
+    <g v-else-if="name === 'circle-close'">
+      <circle cx="12" cy="12" r="9" />
+      <path d="m9 9 6 6m-6 0 6-6" />
+    </g>
+    <g v-else-if="name === 'circle-check'">
+      <circle cx="12" cy="12" r="9" />
+      <path d="m8 12 3 3 5-6" />
+    </g>
+    <g v-else-if="name === 'car'">
       <path
         d="m5 9 2-5h10l2 5M3 10l2-1h14l2 1v9H3zM3 14h18M6 19v2m12-2v2M6 12h2m8 0h2"
       />
