@@ -1,0 +1,17 @@
+{
+  "name": "blitz-client-card",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt --hostname 0.0.0.0 --port 3000",
+    "build": "nuxt build",
+    "start": "nuxt start --hostname 0.0.0.0 --port 3000"
+  },
+  "dependencies": {
+    "nuxt": "2.18.1",
+    "vue": "2.7.16",
+    "vue-server-renderer": "2.7.16",
+    "vue-template-compiler": "2.7.16",
+    "webpack": "4.47.0"
+  }
+}
