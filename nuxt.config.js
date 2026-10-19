@@ -7,7 +7,13 @@ export default {
   router: { base: routerBase },
   generate: { fallback: "404.html" },
   components: true,
-  css: ["~/assets/css/main.css"],
+  css: [
+    "@fontsource/inter/400.css",
+    "@fontsource/inter/500.css",
+    "@fontsource/inter/600.css",
+    "@fontsource/inter/700.css",
+    "~/assets/css/main.css",
+  ],
   head: {
     title: "Карточка клиента · Blitz",
     htmlAttrs: { lang: "ru" },

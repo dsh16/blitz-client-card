@@ -19,7 +19,7 @@ body {
   margin: 0;
   background: #f6f9fa;
   color: var(--ink);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Inter", Arial, sans-serif;
   font-size: 11px;
   -webkit-font-smoothing: antialiased;
 }
@@ -1558,6 +1558,14 @@ td small {
   :root {
     --main-left: 65px;
   }
+  .workspace {
+    padding-left: var(--main-left);
+    padding-right: 14px;
+  }
+  .main-content {
+    width: 100%;
+    margin-left: 0;
+  }
   .client-panel {
     grid-template-columns: 1fr;
     gap: 12px;
@@ -1643,6 +1651,8 @@ td small {
   .workspace {
     padding-top: 0;
     padding-bottom: 63px;
+    padding-left: 14px;
+    padding-right: 14px;
   }
   .sidebar {
     height: 50px;
@@ -1697,7 +1707,7 @@ td small {
     display: none;
   }
   .main-content {
-    margin-left: 20%;
+    margin-left: 0;
     padding-bottom: 8px;
   }
   .toolbar {
