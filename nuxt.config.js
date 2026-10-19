@@ -1,7 +1,11 @@
+const routerBase = process.env.NUXT_ROUTER_BASE || "/";
+
 export default {
   telemetry: false,
   ssr: true,
-  target: "server",
+  target: process.env.NUXT_DEPLOY_TARGET === "static" ? "static" : "server",
+  router: { base: routerBase },
+  generate: { fallback: "404.html" },
   components: true,
   css: ["~/assets/css/main.css"],
   head: {
@@ -17,7 +21,9 @@ export default {
       },
       { name: "theme-color", content: "#147582" },
     ],
-    link: [{ rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }],
+    link: [
+      { rel: "icon", type: "image/svg+xml", href: `${routerBase}favicon.svg` },
+    ],
   },
   build: { parallel: false },
 };
