@@ -263,18 +263,20 @@
           <div>
             <h2 id="tags-title">Категории клиентов</h2>
             <p class="section-description">
-              Теги помогают быстро находить клиентов и сегментировать базу.
+              Категории помогают быстро находить клиентов и сегментировать базу.
             </p>
           </div>
           <button class="button button-outline" @click="openModal('tag')">
-            <AppIcon name="plus" :size="14" />Добавить тег
+            <AppIcon name="plus" :size="14" />Добавить категорию
           </button>
         </div>
         <div v-if="!tags.length" class="empty-state">
           <span class="empty-icon"><AppIcon name="tag" :size="21" /></span>
           <div>
-            <h3>Теги не назначены</h3>
-            <p>Добавьте теги, чтобы отмечать важные особенности клиента.</p>
+            <h3>Категории не назначены</h3>
+            <p>
+              Добавьте категории, чтобы отмечать важные особенности клиента.
+            </p>
           </div>
         </div>
         <div v-else class="tag-list">
@@ -285,14 +287,11 @@
             :style="{ '--tag-color': tag.color }"
             ><AppIcon name="tag" :size="14" />{{ tag.name
             }}<button
-              :aria-label="'Удалить тег ' + tag.name"
+              :aria-label="'Удалить категорию ' + tag.name"
               @click="removeTag(index)"
             >
               <AppIcon name="close" :size="13" /></button></span
-          ><span class="tag-hint"
-            >{{ tags.length }}
-            {{ tags.length === 1 ? "тег назначен" : "тега назначено" }}</span
-          >
+          ><span class="tag-hint">Назначено категорий: {{ tags.length }}</span>
         </div>
       </section>
 
@@ -559,13 +558,13 @@
               Отметьте особенности клиента — так его будет проще найти в базе.
             </p>
             <label class="form-field"
-              >Название тега<input
+              >Название категории<input
                 v-model.trim="form.tag"
                 required
                 maxlength="32"
                 placeholder="Например, постоянный клиент"
             /></label>
-            <span class="form-label">Цвет тега</span>
+            <span class="form-label">Цвет категории</span>
             <div class="color-options">
               <button
                 v-for="color in colors"
@@ -586,7 +585,7 @@
               <button type="button" class="button" @click="closeModal">
                 Отмена</button
               ><button class="button button-primary" type="submit">
-                Добавить тег
+                Добавить категорию
               </button>
             </div>
           </form>
@@ -828,7 +827,7 @@
                 время.
               </li>
               <li>
-                <strong>Теги и абонементы</strong> — добавить особенности и
+                <strong>Категории и абонементы</strong> — добавить особенности и
                 оформить пакет посещений.
               </li>
             </ul>
@@ -839,7 +838,7 @@
           </div>
           <div v-else-if="modal === 'reset'" class="modal-body">
             <p class="modal-description">
-              Вернуть карточку к исходному состоянию? Добавленные теги,
+              Вернуть карточку к исходному состоянию? Добавленные категории,
               абонементы, записи и данные автомобиля будут удалены из этого
               браузера.
             </p>
@@ -924,7 +923,7 @@ export default {
       navigation: [
         { icon: "calendar", label: "Записи" },
         { icon: "users", label: "Клиенты" },
-        { icon: "network", label: "Теги" },
+        { icon: "network", label: "Категории клиентов" },
         { icon: "team", label: "Сотрудники" },
         { icon: "chart", label: "Аналитика" },
         { icon: "card", label: "Абонементы" },
@@ -954,7 +953,7 @@ export default {
       return {
         edit: "Редактировать клиента",
         vehicle: "Данные автомобиля",
-        tag: "Добавить тег",
+        tag: "Добавить категорию",
         subscription: "Добавить абонемент",
         booking: "Записать клиента",
         visit: "Информация о визите",
@@ -1111,18 +1110,18 @@ export default {
           (tag) => tag.name.toLowerCase() === this.form.tag.toLowerCase()
         )
       ) {
-        this.formError = "Такой тег уже назначен клиенту";
+        this.formError = "Такая категория уже назначена клиенту";
         return;
       }
       this.tags.push({ name: this.form.tag, color: this.form.color });
       this.persist();
       this.closeModal();
-      this.notify("Тег добавлен");
+      this.notify("Категория добавлена");
     },
     removeTag(index) {
       this.tags.splice(index, 1);
       this.persist();
-      this.notify("Тег удалён");
+      this.notify("Категория удалена");
     },
     addSubscription() {
       this.subscriptions.push({
