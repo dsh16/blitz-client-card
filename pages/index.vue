@@ -81,7 +81,11 @@
               </button>
             </div>
           </div>
-          <button class="button edit-button" @click="openModal('edit')">
+          <button
+            class="button edit-button"
+            aria-label="Редактировать клиента"
+            @click="openModal('edit')"
+          >
             <AppIcon name="edit" :size="13" /><span>Редактировать</span>
           </button>
           <button class="button button-primary" @click="openModal('booking')">
@@ -101,8 +105,10 @@
             <div class="client-title">
               <p class="eyebrow">Клиент</p>
               <h1 id="client-name">
-                {{ client.name
-                }}<button
+                <span class="client-name-text" :title="client.name">{{
+                  client.name
+                }}</span
+                ><button
                   class="copy-button"
                   title="Скопировать имя"
                   aria-label="Скопировать имя клиента"
@@ -119,28 +125,58 @@
               <span class="small-icon"
                 ><AppIcon name="phone" :size="15"
               /></span>
-              <div>
+              <div class="contact-details">
                 <p class="field-label">Телефон</p>
-                <a
-                  v-if="client.phone"
-                  :href="'tel:' + client.phone"
-                  class="field-value"
-                  >{{ client.phone }}</a
-                >
-                <p v-else class="field-value">Не указан</p>
+                <div class="contact-value-row">
+                  <a
+                    v-if="client.phone"
+                    :href="'tel:' + client.phone"
+                    :title="client.phone"
+                    class="field-value"
+                    >{{ client.phone }}</a
+                  >
+                  <p v-else class="field-value">Не указан</p>
+                  <button
+                    class="copy-button contact-copy-button"
+                    :disabled="!client.phone"
+                    :title="
+                      client.phone
+                        ? 'Скопировать номер телефона'
+                        : 'Телефон не указан'
+                    "
+                    aria-label="Скопировать номер телефона"
+                    @click="copyContact('phone')"
+                  >
+                    <AppIcon name="copy" :size="14" />
+                  </button>
+                </div>
               </div>
             </div>
             <div class="contact-item">
               <span class="small-icon"><AppIcon name="mail" :size="15" /></span>
-              <div>
+              <div class="contact-details">
                 <p class="field-label">Email</p>
-                <a
-                  v-if="client.email"
-                  :href="'mailto:' + client.email"
-                  class="field-value"
-                  >{{ client.email }}</a
-                >
-                <p v-else class="field-value">Не указан</p>
+                <div class="contact-value-row">
+                  <a
+                    v-if="client.email"
+                    :href="'mailto:' + client.email"
+                    :title="client.email"
+                    class="field-value"
+                    >{{ client.email }}</a
+                  >
+                  <p v-else class="field-value">Не указан</p>
+                  <button
+                    class="copy-button contact-copy-button"
+                    :disabled="!client.email"
+                    :title="
+                      client.email ? 'Скопировать email' : 'Email не указан'
+                    "
+                    aria-label="Скопировать email"
+                    @click="copyContact('email')"
+                  >
+                    <AppIcon name="copy" :size="14" />
+                  </button>
+                </div>
               </div>
             </div>
             <div class="contact-item">
@@ -1177,12 +1213,24 @@ export default {
       this.closeModal();
       this.notify("Запись отменена");
     },
-    async copyName() {
+    copyName() {
+      return this.copyText(this.client.name, "Имя клиента скопировано");
+    },
+    copyContact(field) {
+      return this.copyText(
+        this.client[field],
+        field === "phone" ? "Номер телефона скопирован" : "Email скопирован"
+      );
+    },
+    async copyText(value, message) {
+      if (!value) return;
       try {
-        await navigator.clipboard.writeText(this.client.name);
-        this.notify("Имя клиента скопировано");
+        await navigator.clipboard.writeText(value);
+        this.notify(message);
       } catch (_) {
-        this.notify("Скопируйте имя: " + this.client.name);
+        this.notify(
+          "Не удалось скопировать. Выделите текст и скопируйте вручную."
+        );
       }
     },
     navigate(item) {

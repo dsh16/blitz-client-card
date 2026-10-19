@@ -314,6 +314,9 @@ svg {
   align-items: center;
   gap: 5px;
 }
+.client-name-text {
+  min-width: 0;
+}
 .copy-button {
   width: 18px;
   height: 22px;
@@ -321,6 +324,7 @@ svg {
   padding: 2px;
   background: transparent;
   color: #a6adba;
+  flex-shrink: 0;
 }
 .copy-button:hover {
   color: var(--teal);
@@ -390,6 +394,35 @@ svg {
 }
 .contact-item a:hover {
   color: var(--teal);
+}
+.contact-details {
+  flex: 1;
+  min-width: 0;
+}
+.contact-value-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.contact-value-row .field-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.contact-copy-button {
+  width: 26px;
+  height: 26px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+}
+.contact-copy-button:enabled:hover {
+  background: #edf3f5;
+  border-color: #dce6eb;
+}
+.contact-copy-button:disabled {
+  color: #b8c2cd;
+  opacity: 0.6;
 }
 .client-overview {
   border-left: 1px solid var(--line);
@@ -2065,5 +2098,22 @@ td small {
 @container (max-width: 280px) {
   .metrics {
     grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 760px) {
+  .client-heading {
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: 12px;
+  }
+  .client-title {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+  }
+  .client-name-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
