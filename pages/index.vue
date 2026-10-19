@@ -204,6 +204,57 @@
       </section>
 
       <section
+        id="vehicle"
+        class="panel section-panel vehicle-panel"
+        aria-labelledby="vehicle-title"
+      >
+        <div class="section-header">
+          <div>
+            <h2 id="vehicle-title">Информация об автомобиле</h2>
+            <p class="section-description">
+              Данные автомобиля и важные особенности для обслуживания.
+            </p>
+          </div>
+          <button
+            class="button button-outline"
+            aria-label="Редактировать автомобиль"
+            @click="openModal('vehicle')"
+          >
+            <AppIcon name="edit" :size="13" />Редактировать
+          </button>
+        </div>
+        <dl class="vehicle-details">
+          <div class="vehicle-field">
+            <dt><AppIcon name="car" :size="14" />Госномер</dt>
+            <dd :class="{ 'is-empty': !vehicle.licensePlate }">
+              <span :class="{ 'license-plate': vehicle.licensePlate }">{{
+                vehicle.licensePlate || "Не указан"
+              }}</span>
+            </dd>
+          </div>
+          <div class="vehicle-field">
+            <dt>Марка и модель</dt>
+            <dd :class="{ 'is-empty': !vehicle.brand && !vehicle.model }">
+              {{ vehicleName || "Не указаны" }}
+            </dd>
+          </div>
+          <div class="vehicle-field">
+            <dt>Тип кузова</dt>
+            <dd :class="{ 'is-empty': !vehicle.bodyType }">
+              {{ vehicle.bodyType || "Не указан" }}
+            </dd>
+          </div>
+          <div class="vehicle-field vehicle-features">
+            <dt>Особенности автомобиля</dt>
+            <dd
+              :class="{ 'is-empty': !vehicle.features }"
+              v-text="vehicle.features || 'Особенности не указаны'"
+            ></dd>
+          </div>
+        </dl>
+      </section>
+
+      <section
         id="tags"
         class="panel section-panel"
         aria-labelledby="tags-title"
@@ -443,6 +494,59 @@
                 Отмена</button
               ><button class="button button-primary" type="submit">
                 Сохранить изменения
+              </button>
+            </div>
+          </form>
+          <form
+            v-else-if="modal === 'vehicle'"
+            class="modal-body"
+            @submit.prevent="saveVehicle"
+          >
+            <label class="form-field"
+              >Госномер<input
+                v-model.trim="form.licensePlate"
+                maxlength="20"
+                placeholder="Например, А123ВС 77"
+                autocomplete="off"
+            /></label>
+            <div class="form-columns">
+              <label class="form-field"
+                >Марка<input
+                  v-model.trim="form.brand"
+                  maxlength="60"
+                  placeholder="Например, Toyota"
+              /></label>
+              <label class="form-field"
+                >Модель<input
+                  v-model.trim="form.model"
+                  maxlength="60"
+                  placeholder="Например, Camry"
+              /></label>
+            </div>
+            <div class="form-field">
+              <label for="vehicle-body-type">Тип кузова</label>
+              <select id="vehicle-body-type" v-model="form.bodyType">
+                <option value="">Не указан</option>
+                <option v-for="type in bodyTypes" :key="type" :value="type">
+                  {{ type }}
+                </option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="vehicle-features">Особенности автомобиля</label>
+              <textarea
+                id="vehicle-features"
+                v-model.trim="form.features"
+                rows="4"
+                maxlength="1000"
+                placeholder="Цвет, плёнка, повреждения или пожелания по уходу"
+              ></textarea>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="button" @click="closeModal">
+                Отмена</button
+              ><button class="button button-primary" type="submit">
+                Сохранить автомобиль
               </button>
             </div>
           </form>
@@ -736,7 +840,8 @@
           <div v-else-if="modal === 'reset'" class="modal-body">
             <p class="modal-description">
               Вернуть карточку к исходному состоянию? Добавленные теги,
-              абонементы и записи будут удалены из этого браузера.
+              абонементы, записи и данные автомобиля будут удалены из этого
+              браузера.
             </p>
             <div class="modal-footer">
               <button class="button" @click="closeModal">Отмена</button
@@ -758,6 +863,13 @@ const initialClient = () => ({
   phone: "",
   email: "",
 });
+const initialVehicle = () => ({
+  licensePlate: "",
+  brand: "",
+  model: "",
+  bodyType: "",
+  features: "",
+});
 const initialVisits = () => [
   {
     id: 1,
@@ -772,6 +884,21 @@ export default {
   data() {
     return {
       client: initialClient(),
+      vehicle: initialVehicle(),
+      bodyTypes: [
+        "Седан",
+        "Хэтчбек",
+        "Универсал",
+        "Лифтбек",
+        "Купе",
+        "Кабриолет",
+        "Кроссовер",
+        "Внедорожник",
+        "Минивэн",
+        "Фургон",
+        "Пикап",
+        "Другое",
+      ],
       visits: initialVisits(),
       tags: [],
       subscriptions: [],
@@ -808,6 +935,9 @@ export default {
     };
   },
   computed: {
+    vehicleName() {
+      return [this.vehicle.brand, this.vehicle.model].filter(Boolean).join(" ");
+    },
     initials() {
       return this.client.name === "(КА) ИП Андреева Л.С."
         ? "АЛ"
@@ -823,6 +953,7 @@ export default {
     modalTitle() {
       return {
         edit: "Редактировать клиента",
+        vehicle: "Данные автомобиля",
         tag: "Добавить тег",
         subscription: "Добавить абонемент",
         booking: "Записать клиента",
@@ -852,6 +983,7 @@ export default {
         saved.visits.length
       ) {
         this.client = { ...initialClient(), ...saved.client };
+        this.vehicle = { ...initialVehicle(), ...saved.vehicle };
         this.visits = saved.visits;
         this.tags = saved.tags || [];
         this.subscriptions = saved.subscriptions || [];
@@ -879,6 +1011,7 @@ export default {
           "blitz-client-card-v1",
           JSON.stringify({
             client: this.client,
+            vehicle: this.vehicle,
             visits: this.visits,
             tags: this.tags,
             subscriptions: this.subscriptions,
@@ -910,6 +1043,8 @@ export default {
       this.form =
         type === "edit"
           ? { ...this.client }
+          : type === "vehicle"
+          ? { ...this.vehicle }
           : type === "tag"
           ? { tag: "", color: this.colors[0] }
           : type === "subscription"
@@ -918,7 +1053,7 @@ export default {
       document.body.style.overflow = "hidden";
       this.$nextTick(() => {
         const input = this.$el.querySelector(
-          ".modal-card input, .modal-card select"
+          ".modal-card input, .modal-card select, .modal-card textarea"
         );
         (input || this.$el.querySelector(".modal-card")).focus();
       });
@@ -936,7 +1071,7 @@ export default {
       if (event.key === "Tab" && this.modal) {
         const elements = Array.from(
           this.$el.querySelectorAll(
-            '.modal-card button:not([disabled]), .modal-card input, .modal-card select, .modal-card [tabindex="0"]'
+            '.modal-card button:not([disabled]), .modal-card input, .modal-card select, .modal-card textarea, .modal-card [tabindex="0"]'
           )
         );
         const first = elements[0];
@@ -959,6 +1094,15 @@ export default {
       this.persist();
       this.closeModal();
       this.notify("Данные клиента сохранены");
+    },
+    saveVehicle() {
+      this.vehicle = {
+        ...this.form,
+        licensePlate: this.form.licensePlate.toUpperCase(),
+      };
+      this.persist();
+      this.closeModal();
+      this.notify("Данные автомобиля сохранены");
     },
     addTag() {
       if (!this.form.tag) return;
@@ -1072,6 +1216,7 @@ export default {
           JSON.stringify(
             {
               client: this.client,
+              vehicle: this.vehicle,
               tags: this.tags,
               subscriptions: this.subscriptions,
               visits: this.visits,
@@ -1093,6 +1238,7 @@ export default {
     },
     resetData() {
       this.client = initialClient();
+      this.vehicle = initialVehicle();
       this.visits = initialVisits();
       this.tags = [];
       this.subscriptions = [];

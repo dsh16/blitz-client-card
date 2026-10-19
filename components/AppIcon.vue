@@ -10,7 +10,12 @@
     stroke-linejoin="round"
     aria-hidden="true"
   >
-    <g v-if="name === 'calendar'">
+    <g v-if="name === 'car'">
+      <path
+        d="m5 9 2-5h10l2 5M3 10l2-1h14l2 1v9H3zM3 14h18M6 19v2m12-2v2M6 12h2m8 0h2"
+      />
+    </g>
+    <g v-else-if="name === 'calendar'">
       <rect x="4" y="5" width="16" height="16" rx="2" />
       <path d="M8 3v4m8-4v4M4 11h16m-12 4h3m2 0h3m-8 3h3" />
     </g>
